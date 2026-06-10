@@ -1,0 +1,18 @@
+# Backend (Python)
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.env
+
+# Frontend (Node)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+.eslintcache
