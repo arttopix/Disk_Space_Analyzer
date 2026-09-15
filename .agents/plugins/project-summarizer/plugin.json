@@ -1,0 +1,5 @@
+{
+  "name": "project-summarizer-plugin",
+  "version": "1.0.0",
+  "description": "A custom plugin containing skills to count, analyze, and summarize codebase statistics."
+}

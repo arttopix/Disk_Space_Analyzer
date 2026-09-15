@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { HardDrive } from 'lucide-react';
+import { HardDrive, CheckCircle2 } from 'lucide-react';
 import PathInput from './components/PathInput';
 import DiskChart from './components/DiskChart';
 
@@ -8,6 +8,14 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => {
+      setToast(null);
+    }, 3500);
+  };
 
   const handleScan = async (path) => {
     setLoading(true);
@@ -28,15 +36,31 @@ function App() {
     }
   };
 
+  const handleOpenFolder = async (folderPath) => {
+    if (!folderPath) return;
+    try {
+      await axios.post('http://127.0.0.1:8000/open-folder', {
+        path: folderPath
+      });
+      showToast(`Opening in File Explorer: ${folderPath}`);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Failed to open directory in File Explorer.');
+    }
+  };
+
   return (
     <div className="app-container">
       <header>
-        <h1><HardDrive size={36} style={{ verticalAlign: 'middle', marginRight: '10px' }} /> Disk Space Analyzer</h1>
-        <p>Beautiful, intuitive storage visualization</p>
+        <h1>
+          <HardDrive size={36} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
+          Disk Space Analyzer
+        </h1>
+        <p>Beautiful, intuitive storage visualization & quick explorer launcher</p>
       </header>
 
       <div className="glass-panel">
-        <PathInput onScan={handleScan} loading={loading} />
+        <PathInput onScan={handleScan} onOpenFolder={handleOpenFolder} loading={loading} />
         {error && <div className="error-message">{error}</div>}
       </div>
 
@@ -56,14 +80,23 @@ function App() {
             <p>Scanning your drive... This might take a moment depending on the size and speed of your disk.</p>
           </div>
         ) : data ? (
-          <DiskChart data={data} />
+          <DiskChart data={data} onOpenFolder={handleOpenFolder} onScan={handleScan} />
         ) : (
           <div style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
             <p>Enter a path above and click Scan to visualize disk usage.</p>
-            <p style={{ fontSize: '0.9rem', marginTop: '8px', opacity: 0.7 }}>Recommended paths: C:\Users, C:\Environment_Dev</p>
+            <p style={{ fontSize: '0.9rem', marginTop: '8px', opacity: 0.7 }}>
+              Tip: You can also click "Open Folder" or click any arc in the chart to launch File Explorer directly!
+            </p>
           </div>
         )}
       </div>
+
+      {toast && (
+        <div className="toast-success">
+          <CheckCircle2 size={20} />
+          <span>{toast}</span>
+        </div>
+      )}
     </div>
   );
 }
